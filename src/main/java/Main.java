@@ -5,9 +5,8 @@ import org.apache.commons.collections.CollectionUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -15,10 +14,15 @@ public class Main {
         String path = ClassLoader.getSystemClassLoader().getResource("data.json").getPath();
         String s = readToString(path).trim();
         List<Type> types = JSON.parseArray(s, Type.class);
-        List<Type> types1 = builldTree(types);
+        List<Type> typeTree = builldTree(types);
         // 如何取值 id为 842362469438455808 的所有父id需要保持顺序
-        System.out.println(types1);
+        Deque<Long> stack = new ArrayDeque<>();
+        AtomicBoolean flag = new AtomicBoolean(false);
+        contractTypeDFS(842362469438455808L, typeTree, stack, flag);
+        System.out.println(stack);
     }
+
+
     public static List<Type> builldTree(List<Type> list){
         ArrayList<Type> tree = Lists.newArrayList();
         if(CollectionUtils.isNotEmpty(list)){
@@ -57,6 +61,25 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+    // 遍历分类树
+    private static void contractTypeDFS(Long id, List<Type> contractTypeTree, Deque<Long> stack, AtomicBoolean flag) {
+        for (Type type : contractTypeTree) {
+            if (flag.get() == true) {
+                break;
+            }
+            if (Objects.equals(id, type.getId())) {
+                flag.set(true);
+                stack.push(type.getId());
+                break;
+            }
+            stack.push(type.getId());
+            if (CollectionUtils.isEmpty(type.getChildList())) {
+                stack.pop();
+            } else {
+                contractTypeDFS(id, type.getChildList(), stack, flag);
+            }
         }
     }
 }
