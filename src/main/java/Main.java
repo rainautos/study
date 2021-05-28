@@ -18,11 +18,32 @@ public class Main {
         // 如何取值 id为 842362469438455808 的所有父id需要保持顺序
         Deque<Long> stack = new ArrayDeque<>();
         AtomicBoolean flag = new AtomicBoolean(false);
-        contractTypeDFS(842362469438455808L, typeTree, stack, flag);
+        // contractTypeDFS(841339223809196032L, typeTree, stack, flag);
+        Deque<Long> longs = treeFindPath(typeTree, 841338235396292608L, stack);
         System.out.println(stack);
     }
 
-
+    public static Deque<Long> treeFindPath(List<Type> tree, Long id, Deque<Long> stack){
+        Deque<Long> emptyStack = new ArrayDeque<>();
+        if(CollectionUtils.isEmpty(tree)){
+            return emptyStack;
+        }
+        for (Type type : tree) {
+            System.out.println(type.getId());
+            stack.push(type.getId());
+            if(Objects.equals(type.getId(),id)){
+                return stack;
+            }
+            if(CollectionUtils.isNotEmpty(type.getChildList())){
+                Deque<Long> longs = treeFindPath(type.getChildList(), id, stack);
+                if(!longs.isEmpty()){
+                    return longs;
+                }
+            }
+            stack.pop();
+        }
+        return emptyStack;
+    }
     public static List<Type> builldTree(List<Type> list){
         ArrayList<Type> tree = Lists.newArrayList();
         if(CollectionUtils.isNotEmpty(list)){
