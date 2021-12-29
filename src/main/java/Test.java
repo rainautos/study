@@ -1,3 +1,6 @@
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,6 +11,8 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * todo Created with IntelliJ IDEA
@@ -17,6 +22,7 @@ import java.util.List;
  * @date 2021/12/14 15:15
  */
 public class Test {
+
     public static void main(String[] args) {
         LocalDate now = LocalDate.now().plusMonths(-1);
         System.out.println("现在时间="+ now);
@@ -56,9 +62,24 @@ public class Test {
         noticeList.add(new StringBuilder("123"));
         noticeList.add(new StringBuilder("123"));
         System.out.println(noticeList);
-        System.out.println(StringUtils);
-    }
+        System.out.println(StringUtils.join(noticeList,","));
 
+        List<C> cList = Lists.newArrayList();
+        cList.add(new C((short) 1, "SKU001"));
+        cList.add(new C((short) 2, "SKU001"));
+        cList.add(new C((short) 3, "SKU005"));
+        cList.add(new C((short) 3, "SKU001"));
+        cList.add(new C((short) 1, "SKU002"));
+        cList.add(new C((short) 1, "SKU001"));
+        System.out.println(cList);
+
+        Map<Short, List<String>> collect = cList.stream()
+                .collect(Collectors.toMap(C::getStatus, c -> Lists.newArrayList(c.getCode()), (List<String> newList, List<String> oldList) -> {
+                    oldList.addAll(newList);
+                    return oldList;
+                }));
+        System.out.println(collect);
+    }
 
 
     private static LocalDate parseString2Date(String timeStr) {
